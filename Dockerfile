@@ -19,8 +19,9 @@ USER 10001
 EXPOSE 8000
 
 # --proxy-headers: la IP real del cliente la entrega el gateway (X-Forwarded-For).
-# El servicio solo es alcanzable desde la red interna de Docker.
+# Solo se le cree esa cabecera a la dirección de FORWARDED_ALLOW_IPS (la del gateway);
+# sin esa variable, uvicorn solo confía en 127.0.0.1.
 CMD ["uvicorn", "app.main:create_app", "--factory", \
      "--host", "0.0.0.0", "--port", "8000", \
-     "--proxy-headers", "--forwarded-allow-ips", "*", \
+     "--proxy-headers", \
      "--no-server-header"]

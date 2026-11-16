@@ -9,8 +9,16 @@ from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 MIN_PRICE = 100
 MAX_PRICE = 1_000_000
 
-ProductName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=60)]
-Description = Annotated[str, StringConstraints(strip_whitespace=True, max_length=200)]
+# Sin caracteres de control (saltos de línea, NUL...): no sirven en un nombre y
+# permitirían falsificar líneas del log o provocar errores en la base.
+PRINTABLE = r"^[^\x00-\x1f\x7f]*$"
+
+ProductName = Annotated[
+    str, StringConstraints(strip_whitespace=True, min_length=2, max_length=60, pattern=PRINTABLE)
+]
+Description = Annotated[
+    str, StringConstraints(strip_whitespace=True, max_length=200, pattern=PRINTABLE)
+]
 
 
 class ProductIn(BaseModel):

@@ -40,7 +40,8 @@ def get_engine() -> Engine:
     if url.startswith("sqlite"):
         # Solo para pruebas: una única conexión en memoria compartida.
         return create_engine(url, connect_args={"check_same_thread": False}, poolclass=StaticPool)
-    return create_engine(url, pool_pre_ping=True, pool_size=5, max_overflow=5)
+    # hide_parameters: los valores de una consulta fallida nunca llegan al log.
+    return create_engine(url, pool_pre_ping=True, pool_size=5, max_overflow=5, hide_parameters=True)
 
 
 @lru_cache

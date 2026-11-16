@@ -29,13 +29,3 @@ class NotFound(AppError):
 class Conflict(AppError):
     status_code = 409
     detail = "Ya existe."
-
-
-class Unprocessable(AppError):
-    status_code = 422
-    detail = "No se puede procesar la solicitud."
-
-
-class ServiceUnavailable(AppError):
-    status_code = 503
-    detail = "Un servicio del que dependemos no está disponible."

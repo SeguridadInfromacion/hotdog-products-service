@@ -41,7 +41,8 @@ class AuditRepository:
 
     def record(self, *, actor: str, action: str, target: str = "", ip: str = "") -> None:
         self._session.add(AuditLog(actor=actor, action=action, target=target[:120], ip=ip[:45]))
-        audit_logger.info("actor=%s action=%s target=%s ip=%s", actor, action, target, ip)
+        # %r: un salto de línea en un dato no puede falsificar otra línea del log.
+        audit_logger.info("actor=%r action=%r target=%r ip=%r", actor, action, target, ip)
 
     def recent(self, limit: int = 100) -> Sequence[AuditLog]:
         query = select(AuditLog).order_by(AuditLog.occurred_at.desc()).limit(limit)

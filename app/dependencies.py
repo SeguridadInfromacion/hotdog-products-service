@@ -1,7 +1,5 @@
 """Dependencias de FastAPI: sesión, usuario actual, roles y protección CSRF."""
 
-import uuid
-from dataclasses import dataclass
 from typing import Annotated
 
 from fastapi import Depends, Request
@@ -9,25 +7,12 @@ from sqlalchemy.orm import Session
 
 from app.database import get_session
 from app.errors import NotAuthenticated, PermissionDenied
-from app.security import decode_token
+from app.security import AuthenticatedUser, authenticate
 
 SESSION_COOKIE = "access_token"
-ROLE_ADMIN = "admin"
 SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
 
 SessionDep = Annotated[Session, Depends(get_session)]
-
-
-@dataclass(frozen=True)
-class AuthenticatedUser:
-    id: uuid.UUID
-    username: str
-    role: str
-    token: str
-
-    @property
-    def is_admin(self) -> bool:
-        return self.role == ROLE_ADMIN
 
 
 def client_ip(request: Request) -> str:
@@ -58,10 +43,7 @@ def get_current_user(request: Request) -> AuthenticatedUser:
     token = _extract_token(request)
     if token is None:
         raise NotAuthenticated
-    claims = decode_token(token)
-    return AuthenticatedUser(
-        id=claims.user_id, username=claims.username, role=claims.role, token=token
-    )
+    return authenticate(token)
 
 
 CurrentUser = Annotated[AuthenticatedUser, Depends(get_current_user)]
