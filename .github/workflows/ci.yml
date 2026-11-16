@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Instalar dependencias
+        run: pip install -r requirements-dev.txt
+      - name: Estilo y errores comunes (ruff)
+        run: |
+          ruff check .
+          ruff format --check .
+      - name: Análisis de seguridad del código (bandit)
+        run: bandit -q -r app
+      - name: Pruebas
+        run: pytest -q
+      - name: Dependencias con vulnerabilidades conocidas (pip-audit)
+        run: pip-audit -r requirements.txt
+      - name: La imagen de Docker construye
+        run: docker build -t service:ci .
